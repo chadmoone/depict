@@ -22,6 +22,11 @@ var argv = optimist
     describe: 'CSS file to include in rendering',
     default: false
   })
+  .options('j', {
+    alias: 'js',
+    describe: 'JS file to include in rendering',
+    default: false
+  })
   .options('H', {
     alias: 'hide-selector',
     describe: 'Hide attributes of this selector before rendering.',
@@ -59,6 +64,12 @@ if (css_file) {
     css_text = fs.readFileSync(css_file, 'utf8');
 }
 
+var js_file = argv.j || argv.js;
+var js_text = '';
+if (js_file) {
+    js_text = fs.readFileSync(js_file, 'utf8');
+}
+
 var hide_selector = argv.H || argv["hide-selector"];
 if (hide_selector) {
   css_text += "\n\n " + hide_selector + " { display: none; }\n";
@@ -91,14 +102,23 @@ function depict(url, out_file, selector, css_text) {
   }
 
   function prepForRender(status) {
-    page.evaluate(runInPhantomBrowser, renderImage, selector, css_text);
+    var js_to_eval = '';
+    if (js_text) {
+      js_to_eval = '(function() {' + js_text + '})();';
+    }
+    page.evaluate(runInPhantomBrowser, renderImage, selector, css_text,
+        js_to_eval);
   }
 
-  function runInPhantomBrowser(selector, css_text) {
+  function runInPhantomBrowser(selector, css_text, js_to_eval) {
     if (css_text) {
       var style = document.createElement('style');
       style.appendChild(document.createTextNode(css_text));
       document.head.appendChild(style);
+    }
+
+    if (js_to_eval) {
+      eval(js_to_eval);
     }
 
     var element = document.querySelector(selector);
