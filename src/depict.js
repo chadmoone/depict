@@ -45,6 +45,11 @@ var argv = optimist
     describe: 'How long to wait for the target page to call `callPhantom()`, in seconds.',
     default: 30
   })
+  .options('--phantomjs-path', {
+    describe: 'Path to phantomjs executable',
+    // Assume it is in the user's PATH
+    default: 'phantomjs'
+  })
   .check(function(argv) {
     if (argv._.length !== 2) {
       throw new Error('URL and OUT_FILE must be given.');
@@ -97,7 +102,8 @@ function depict(url, out_file, selector, css_text) {
 
   console.log('\nRequesting', url);
 
-  phantom.create(createPage)
+  // TODO This hangs if the binary is incorrect
+  phantom.create(createPage, { binary: argv['phantomjs-path'] })
 
   function createPage(_ph) {
     ph = _ph;
