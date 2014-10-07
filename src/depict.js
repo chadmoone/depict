@@ -45,7 +45,7 @@ var argv = optimist
     describe: 'How long to wait for the target page to call `callPhantom()`, in seconds.',
     default: 30
   })
-  .options('--phantomjs-path', {
+  .options('phantomjs-path', {
     describe: 'Path to phantomjs executable',
     // Assume it is in the user's PATH
     default: 'phantomjs'
